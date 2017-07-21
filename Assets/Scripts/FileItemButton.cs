@@ -13,8 +13,10 @@ public class FileItemButton : MonoBehaviour {
     FileSystem fs;
     GameObject panelManagerObject;
     GameObject inspectorObject;
+    GameObject sceneManagerObject;
     private PanelManager panelManager;
     private Inspector inspector;
+    private SceneManager sceneManager;
     // Use this for initialization
     
     void Start () {
@@ -22,10 +24,12 @@ public class FileItemButton : MonoBehaviour {
         fs = GameObject.FindGameObjectWithTag("FileSystem").GetComponent<FileSystem>();
         panelManagerObject = GameObject.FindGameObjectWithTag("PanelManager");
         inspectorObject = GameObject.FindGameObjectWithTag("Inspector");
+        sceneManagerObject = GameObject.FindGameObjectWithTag("SceneManager");
         button.onClick.AddListener(HandleClick);
         panelManager = panelManagerObject.GetComponent<PanelManager>();
         inspector = inspectorObject.GetComponent<Inspector>();
-	}
+        sceneManager = sceneManagerObject.GetComponent<SceneManager>();
+    }
 	public void Setup(string fileAbsoluteDirectory, string fileRelativeDirectory, bool isDirectory)
     {
         this.isDirectory = isDirectory;
@@ -47,7 +51,11 @@ public class FileItemButton : MonoBehaviour {
                 Object targetObject = (GameObject)AssetDatabase.LoadAssetAtPath<Object>(fileRelativeDirectory);
                 GameObject target = Instantiate(targetObject) as GameObject;
                 inspector.SetFileTransform(target);
-            }else
+            } else if (fileAbsoluteDirectory.Contains(".unity")) {
+                Debug.Log("Path: " + fileRelativeDirectory);
+                sceneManager.LoadScene(fileRelativeDirectory);
+                //sceneManager.LoadScene("VR_Interior_Design");
+            } else
             {
                 Debug.LogError("Can't open file or directory!");
             }

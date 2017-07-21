@@ -19,10 +19,10 @@ public class SceneManager : MonoBehaviour {
 		
 	}
 
-    public void LoadSceneByPath(string path)
+    public void LoadScene(string path)
     {
-        
-        SceneManager.LoadScene(path, LoadSceneMode.Additive);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene(path, LoadSceneMode.Additive);
     }
 
     public void CloseScene()
