@@ -4,6 +4,8 @@
 
     public class VRTK_ControllerEvents_ListenerExample : MonoBehaviour
     {
+		private GameObject assetsMenu;
+
         private void Start()
         {
             if (GetComponent<VRTK_ControllerEvents>() == null)
@@ -68,6 +70,8 @@
             GetComponent<VRTK_ControllerEvents>().ControllerDisabled += new ControllerInteractionEventHandler(DoControllerDisabled);
 
             GetComponent<VRTK_ControllerEvents>().ControllerIndexChanged += new ControllerInteractionEventHandler(DoControllerIndexChanged);
+
+			assetsMenu = GameObject.FindGameObjectWithTag ("AssetsMenu");
         }
 
         private void DebugLogger(uint index, string button, string action, ControllerInteractionEventArgs e)
@@ -213,11 +217,25 @@
 
         private void DoButtonTwoPressed(object sender, ControllerInteractionEventArgs e)
         {
+			
             DebugLogger(VRTK_ControllerReference.GetRealIndex(e.controllerReference), "BUTTON TWO", "pressed down", e);
         }
 
+        
+
         private void DoButtonTwoReleased(object sender, ControllerInteractionEventArgs e)
         {
+			AssetsMenuController assetsMenuController = assetsMenu.GetComponent<AssetsMenuController>();
+			if (assetsMenuController.assetsMenuPanelController.isShow)
+            {
+				assetsMenuController.isShow = false;
+                assetsMenuController.ClosePanel();
+            }else
+            {
+				assetsMenuController.isShow = true;
+                assetsMenuController.ShowPanel();
+            }
+            
             DebugLogger(VRTK_ControllerReference.GetRealIndex(e.controllerReference), "BUTTON TWO", "released", e);
         }
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using VRTK;
+using VRTK.SecondaryControllerGrabActions;
 
 public class FileItemButton : MonoBehaviour {
 
@@ -17,8 +19,11 @@ public class FileItemButton : MonoBehaviour {
     private PanelManager panelManager;
     private Inspector inspector;
     private SceneManager sceneManager;
-    // Use this for initialization
+	private GameObject controller;
+	private ControllerGrabManager grabManager;
     
+    // Use this for initialization
+
     void Start () {
         button = GetComponent<Button>();
         fs = GameObject.FindGameObjectWithTag("FileSystem").GetComponent<FileSystem>();
@@ -28,42 +33,64 @@ public class FileItemButton : MonoBehaviour {
         button.onClick.AddListener(HandleClick);
         panelManager = panelManagerObject.GetComponent<PanelManager>();
         inspector = inspectorObject.GetComponent<Inspector>();
+		controller = inspector.controller;
+		grabManager = controller.GetComponent<ControllerGrabManager> ();
         sceneManager = sceneManagerObject.GetComponent<SceneManager>();
     }
-	public void Setup(string fileAbsoluteDirectory, string fileRelativeDirectory, bool isDirectory)
+	public void FileSetup(string fileAbsoluteDirectory, string fileRelativeDirectory, bool isDirectory)
     {
         this.isDirectory = isDirectory;
         this.fileAbsoluteDirectory = fileAbsoluteDirectory;
         this.fileRelativeDirectory = fileRelativeDirectory;
     }
+
+    public void TextureSetup()
+    {
+
+    }
     void HandleClick()
     {
-        if(fs == null)
+        
+        if (fs == null)
         {
             Debug.LogError("File system not found!");
         }
-        else if(!isDirectory)
+        else if (!isDirectory)
         {
             if (fileAbsoluteDirectory.Contains(".prefab"))
             {
-                panelManager.ChangePanelTo("inspector");
+
                 Debug.Log("Prefab directory: " + fileRelativeDirectory);
                 Object targetObject = (GameObject)AssetDatabase.LoadAssetAtPath<Object>(fileRelativeDirectory);
                 GameObject target = Instantiate(targetObject) as GameObject;
+                target.AddComponent<VRTK_InteractableObject>();
+                target.GetComponent<VRTK_InteractableObject>().isGrabbable = true;
+                target.AddComponent<VRTK_AxisScaleGrabAction>();
                 inspector.SetFileTransform(target);
-            } else if (fileAbsoluteDirectory.Contains(".unity")) {
+                VRTK_ObjectAutoGrab objectAutoGrab = inspector.controller.GetComponent<VRTK_ObjectAutoGrab>();
+                grabManager.SetAutoGrab(true);
+                objectAutoGrab.objectToGrab = target.GetComponent<VRTK_InteractableObject>();
+                objectAutoGrab.enabled = true;
+                panelManager.ChangePanelTo("inspector");
+            }
+            else if (fileAbsoluteDirectory.Contains(".unity"))
+            {
                 Debug.Log("Path: " + fileRelativeDirectory);
                 sceneManager.LoadScene(fileRelativeDirectory);
                 //sceneManager.LoadScene("VR_Interior_Design");
-            } else
+            }
+            else
             {
                 Debug.LogError("Can't open file or directory!");
             }
-            
-        }else
+
+        }
+        else
         {
             fs.ChangeDirectory(fileAbsoluteDirectory);
         }
+        
+        
         
     }
     // Update is called once per frame

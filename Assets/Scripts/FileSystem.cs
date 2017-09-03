@@ -8,16 +8,16 @@ using System.IO;
 public class FileSystem : MonoBehaviour {
     [SerializeField]
     Transform contentTransfrom;
-    [SerializeField]
-    Text text;
+    //[SerializeField]
+    //Text text;
     [SerializeField]
     GameObject fileItemInstance;
-    [SerializeField]
-    RawImage image;
-    [SerializeField]
-    Object o;
-    [SerializeField]
-    Text fileName;
+    //[SerializeField]
+    //RawImage image;
+    //[SerializeField]
+    //Object o;
+    //[SerializeField]
+    //Text fileName;
     [SerializeField]
     Material materialInstance;
     [SerializeField]
@@ -30,10 +30,19 @@ public class FileSystem : MonoBehaviour {
     private Object[] assetList;
     private string parentDirectoryName = "";
 
+
+	private AssetsMenuController assetsMenuController;
+
+	public string currentRelativeDirectory;
+	public GameObject assetsMenu;
+	public Text headerText;
+
     // Use this for initialization
     void Start () {
         currentDirectory = Application.dataPath;
-        
+
+		assetsMenuController = assetsMenu.GetComponent<AssetsMenuController> ();
+		headerText = header.GetComponentsInChildren<Text>()[0];
         LoadDirectory();
 
         /*fileItemList = new GameObject[1];
@@ -75,10 +84,14 @@ public class FileSystem : MonoBehaviour {
     }
     public void LoadDirectory()
     {
+		// Rescale asset menu
+		assetsMenu.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+		assetsMenu.transform.rotation = assetsMenuController.getInitialRotation();
+
         currentDirectoryInfo = new DirectoryInfo(currentDirectory);
-        string currentRelativeDirectory = currentDirectory.Substring(Application.dataPath.Length - 6, currentDirectory.Length - Application.dataPath.Length + 6);
+        currentRelativeDirectory = currentDirectory.Substring(Application.dataPath.Length - 6, currentDirectory.Length - Application.dataPath.Length + 6);
         Debug.Log("Current directory: " + currentRelativeDirectory);
-        Text headerText = header.GetComponentsInChildren<Text>()[1];
+        
         headerText.text = currentRelativeDirectory;
         FileInfo[] info = currentDirectoryInfo.GetFiles("*.meta");
         DirectoryInfo[] directory = currentDirectoryInfo.GetDirectories(Application.dataPath);
@@ -102,11 +115,11 @@ public class FileSystem : MonoBehaviour {
             if (fileName.Contains("."))
             {
                 // Debug.Log("File " + fileName + " is not a directory.");
-                button.GetComponent<FileItemButton>().Setup(fileAbsoluteDir, fileRelativeDir, false);
+                button.GetComponent<FileItemButton>().FileSetup(fileAbsoluteDir, fileRelativeDir, false);
             }else
             {
                 // Debug.Log("File " + fileName + " is a directory.");
-                button.GetComponent<FileItemButton>().Setup(fileAbsoluteDir, fileRelativeDir, true);
+                button.GetComponent<FileItemButton>().FileSetup(fileAbsoluteDir, fileRelativeDir, true);
             }
             
             if(assetList[i].name.Length > 10)
@@ -122,6 +135,8 @@ public class FileSystem : MonoBehaviour {
             Texture2D thumbNailTexture = AssetPreview.GetMiniThumbnail(assetList[i]);
             thumbNail.texture = thumbNailTexture;
             fileItemList[i].transform.SetParent(contentTransfrom);
+			RectTransform fileItemRectTransform = fileItemList [i].GetComponent<RectTransform> ();
+			fileItemRectTransform.localPosition = new Vector3 (fileItemRectTransform.localPosition.x, fileItemRectTransform.localPosition.y, 0.0f);
         }
     }
     

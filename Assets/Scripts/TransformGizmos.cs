@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using VRTK;
 
 namespace RuntimeGizmos
 {
@@ -16,6 +17,10 @@ namespace RuntimeGizmos
 		public KeyCode SetRotateType = KeyCode.E;
 		public KeyCode SetScaleType = KeyCode.R;
 		public KeyCode SetSpaceToggle = KeyCode.X;
+
+        // public GameObject targetObject;
+        public GameObject controller;
+        public VRTK_Pointer pointer;
 
 		Color xColor = new Color(1, 0, 0, 0.8f);
 		Color yColor = new Color(0, 1, 0, 0.8f);
@@ -44,7 +49,7 @@ namespace RuntimeGizmos
 		Quaternion totalRotationAmount;
 		Axis selectedAxis = Axis.None;
 		AxisInfo axisInfo;
-		Transform target;
+		public Transform target;
 		Camera myCamera;
 
 		static Material lineMaterial;
@@ -52,17 +57,24 @@ namespace RuntimeGizmos
 		void Awake()
 		{
 			myCamera = GetComponent<Camera>();
-			SetMaterial();
+            pointer = controller.GetComponent<VRTK_Pointer>();
+            pointer.DestinationMarkerEnter += OnPointerEnter;
+
+            SetMaterial();
 		}
+
+        void OnPointerEnter(object sender, DestinationMarkerEventArgs e)
+        {
+            target = e.target;
+        }
 
 		void Update()
 		{
 			SetSpaceAndType();
 			SelectAxis();
-			GetTarget();
+			// GetTarget();
 			if(target == null) return;
-			
-			TransformSelected();
+            TransformSelected();
 		}
 
 		void LateUpdate()
@@ -133,8 +145,9 @@ namespace RuntimeGizmos
 
 		void TransformSelected()
 		{
-			if(selectedAxis != Axis.None && Input.GetMouseButtonDown(0))
-			{
+			//if(selectedAxis != Axis.None && Input.GetMouseButtonDown(0))
+            if (selectedAxis != Axis.None && Input.GetMouseButtonDown(0))
+            {
 				StartCoroutine(TransformSelected(type));
 			}
 		}
@@ -216,19 +229,6 @@ namespace RuntimeGizmos
 			return Vector3.zero;
 		}
 	
-		void GetTarget()
-		{
-			if(selectedAxis == Axis.None && Input.GetMouseButtonDown(0))
-			{
-				RaycastHit hitInfo; 
-				if(Physics.Raycast(myCamera.ScreenPointToRay(Input.mousePosition), out hitInfo))
-				{
-					target = hitInfo.transform;
-				}else{
-					target = null;
-				}
-			}
-		}
 
 		AxisVectors selectedLinesBuffer = new AxisVectors();
 		void SelectAxis()
