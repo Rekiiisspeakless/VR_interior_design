@@ -13,8 +13,6 @@ public class TextureManager : MonoBehaviour {
     [SerializeField]
     GameObject sphereInstance;
     [SerializeField]
-    Shader shader;
-    [SerializeField]
     GameObject header;
 
     private GameObject[] fileItemList;
@@ -23,8 +21,11 @@ public class TextureManager : MonoBehaviour {
     private GameObject target;
     private Texture texture;
     private Text headerText;
+    private string targetTextureType;
+    private Texture targetTexture;
 
     public string textureName;
+    public Image[] images;
 
     // Use this for initialization
     void Start () {
@@ -39,14 +40,18 @@ public class TextureManager : MonoBehaviour {
         for (int i = 0; i < guids.Length; ++i)
         {
             string fileRelativeDir = AssetDatabase.GUIDToAssetPath(guids[i]);
-            Debug.Log(fileRelativeDir);
+            // Debug.Log(fileRelativeDir);
             assetList[i] = AssetDatabase.LoadMainAssetAtPath(fileRelativeDir);
             fileItemList[i] = Instantiate<GameObject>(fileItemInstance);
 
             //TODO: change fileItemButton to fileItemToggle
+            FileItemToggle fileItemToggle = fileItemList[i].GetComponentInChildren<FileItemToggle>();
             Text name = fileItemList[i].GetComponentInChildren<Text>();
-            RawImage thumbNail = fileItemList[i].GetComponentInChildren<RawImage>();
-            Button button = fileItemList[i].GetComponentInChildren<Button>();
+            Toggle toggle = fileItemList[i].GetComponentInChildren<Toggle>();
+            images = fileItemList[i].GetComponentsInChildren<Image>();
+            Debug.Log("images length = " + images.Length);
+            Image thumbNail = images[1];
+            images[2] = null;
 
             Texture texture = (Texture)assetList[i];
             // sphere.AddComponent(typeof(Material));
@@ -60,18 +65,31 @@ public class TextureManager : MonoBehaviour {
                 name.text = assetList[i].name;
             }
 
+            if (texture == targetTexture)
+            {
+                toggle.isOn = true;
+            }else
+            {
+                toggle.isOn = false;
+            }
             Texture2D thumbNailTexture = AssetPreview.GetMiniThumbnail(assetList[i]);
             // Texture2D thumbNailTexture = AssetPreview.GetAssetPreview(sphereInstance);
-            
-            thumbNail.texture = thumbNailTexture;
+
+            Sprite s = Sprite.Create(thumbNailTexture, 
+                new Rect(0, 0, thumbNailTexture.width, thumbNailTexture.height), 
+                Vector2.zero);
+            thumbNail.sprite = s;
             fileItemList[i].transform.SetParent(contentTransfrom);
+            
             RectTransform fileItemRectTransform = fileItemList[i].GetComponent<RectTransform>();
             fileItemRectTransform.localPosition = new Vector3(fileItemRectTransform.localPosition.x, fileItemRectTransform.localPosition.y, 0.0f);
             fileItemRectTransform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
     }
-    public void SetTarget(GameObject target) {
+    public void SetTarget(GameObject target, string targetTextureType, Texture targetTexture) {
         this.target = target;
+        this.targetTextureType = targetTextureType;
+        this.targetTexture = targetTexture;
     }
 
     public void SetTexture(Texture texture, string textureName) {
@@ -84,8 +102,7 @@ public class TextureManager : MonoBehaviour {
     {
         Material targetMaterial;
         targetMaterial = target.GetComponent<Renderer>().material;
-        targetMaterial = new Material(shader);
-        targetMaterial.mainTexture = texture;
+        targetMaterial.SetTexture(targetTextureType, texture);   
     }
 
 	// Update is called once per frame

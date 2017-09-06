@@ -66,7 +66,7 @@ public class FileItemButton : MonoBehaviour {
                 target.AddComponent<VRTK_InteractableObject>();
                 target.GetComponent<VRTK_InteractableObject>().isGrabbable = true;
                 target.AddComponent<VRTK_AxisScaleGrabAction>();
-                inspector.SetFileTransform(target);
+                inspector.SetTarget(target);
                 VRTK_ObjectAutoGrab objectAutoGrab = inspector.controller.GetComponent<VRTK_ObjectAutoGrab>();
                 grabManager.SetAutoGrab(true);
                 objectAutoGrab.objectToGrab = target.GetComponent<VRTK_InteractableObject>();
